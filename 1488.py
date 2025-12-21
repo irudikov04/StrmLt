@@ -57,18 +57,10 @@ with tab2:
     hero = st.selectbox("Выберите героя:", HEROES, key="balance_hero")
     
     st.subheader("Текущие параметры")
-    
-    # Ключ для сессии, чтобы сохранять значения
-    session_key = f"current_params_{hero}"
-    
-    # Инициализация или получение сохранённых параметров
-    if session_key not in st.session_state:
-        # Генерируем начальные параметры только один раз
-        st.session_state[session_key] = {param: random.randint(50, 150) for param in PARAMS}
-    
-    current_params = st.session_state[session_key]
+    current_params = {param: random.randint(50, 150) for param in PARAMS}
     
     col1, col2 = st.columns(2)
+    proposed_params = {}
     
     with col1:
         st.write("**Текущие значения:**")
@@ -77,40 +69,14 @@ with tab2:
     
     with col2:
         st.write("**Предлагаемые изменения:**")
-        proposed_params = {}
-        
         for param in PARAMS:
-            # Ключ для каждого слайдера
-            slider_key = f"slider_{hero}_{param}"
-            
-            # Инициализация значения слайдера
-            if slider_key not in st.session_state:
-                st.session_state[slider_key] = current_params[param]
-            
-            # Создаём слайдер с сохранённым значением
-            proposed_value = st.slider(
+            proposed_params[param] = st.slider(
                 param, 
                 min_value=int(current_params[param] * 0.5), 
                 max_value=int(current_params[param] * 1.5), 
-                value=st.session_state[slider_key],  # Используем сохранённое значение
-                key=slider_key
+                value=current_params[param],
+                key=f"slider_{param}"
             )
-            
-            # Обновляем значение в session_state
-            st.session_state[slider_key] = proposed_value
-            proposed_params[param] = proposed_value
-    
-    # Кнопка сброса значений
-    if st.button("Сбросить к значениям по умолчанию", type="secondary"):
-        # Удаляем сохранённые значения слайдеров
-        for param in PARAMS:
-            slider_key = f"slider_{hero}_{param}"
-            if slider_key in st.session_state:
-                del st.session_state[slider_key]
-        # Удаляем параметры героя
-        if session_key in st.session_state:
-            del st.session_state[session_key]
-        st.rerun()
     
     if st.button("Рассчитать влияние", type="primary"):
         # Демо-расчёт изменения винрейта

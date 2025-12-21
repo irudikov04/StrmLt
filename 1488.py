@@ -404,54 +404,6 @@ with tab2:
                 st.write("**Сохраненные параметры:**")
                 st.json(proposed_params)
 
-# =================== ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ В САЙДБАР ===================
-with st.sidebar:
-    st.header("ℹ️ О параметрах героев")
-    
-    selected_hero = st.selectbox("Выберите героя для справки:", HEROES, key="sidebar_hero")
-    
-    if selected_hero in HERO_STATS:
-        st.subheader(f"Характеристики {selected_hero}")
-        
-        stats = HERO_STATS[selected_hero]
-        
-        # Определяем роль героя
-        if selected_hero in ["Axe", "Pudge"]:
-            role = "Танк/Иницииатор"
-            desc = "Высокое здоровье и броня, хороший контроль"
-        elif selected_hero == "Джаггернаут":
-            role = "Керри/Урон"
-            desc = "Высокий урон и скорость атаки, но хрупкий"
-        elif selected_hero in ["Invoker", "Cristal maiden"]:
-            role = "Маг/Саппорт"
-            desc = "Высокая мана и контроль, но низкая выживаемость"
-        else:
-            role = "Универсал"
-            desc = "Сбалансированные характеристики"
-        
-        st.write(f"**Роль:** {role}")
-        st.write(f"**Описание:** {desc}")
-        
-        # Показываем характеристики
-        for param, value in stats.items():
-            if param == "Здоровье":
-                st.progress(value/1200, text=f"{param}: {value} HP")
-            elif param == "Мана":
-                st.progress(value/500, text=f"{param}: {value} MP")
-            elif param == "Броня":
-                st.progress((value + 5)/25, text=f"{param}: {value}")
-            elif param == "Урон":
-                st.progress(value/200, text=f"{param}: {value}")
-            else:  # Скорость атаки
-                st.progress(value/300, text=f"{param}: {value}")
-    
-    st.markdown("---")
-    st.caption("**Справка по параметрам:**")
-    st.caption("- **Здоровье (HP):** Запас жизней героя")
-    st.caption("- **Броня:** Снижает получаемый физический урон")
-    st.caption("- **Урон:** Базовый урон при атаке")
-    st.caption("- **Скорость атаки:** Скорость нанесения ударов")
-    st.caption("- **Мана (MP):** Запас маны для использования способностей")
 
 # =================== ВКЛАДКА 3: ГЕНЕРАТОР КОНТЕНТА ===================
 with tab3:

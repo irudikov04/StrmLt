@@ -11,6 +11,10 @@ st.set_page_config(page_title="Game Balance AI", layout="wide")
 HEROES = ["Axe", "Джаггернаут", "Invoker", "Cristal maiden", "Pudge"]
 PARAMS = ["Урон", "Здоровье", "Скорость атаки", "Броня", "Мана"]
 
+# Инициализация session_state для хранения значений ползунков
+if 'proposed_params' not in st.session_state:
+    st.session_state.proposed_params = {}
+
 # =================== ЗАГОЛОВОК ===================
 st.title("🎮 Интеллектуальная система анализа баланса и генерации контента")
 st.markdown("---")
@@ -56,11 +60,15 @@ with tab2:
     
     hero = st.selectbox("Выберите героя:", HEROES, key="balance_hero")
     
+    # Инициализация current_params для выбранного героя
+    if f'current_params_{hero}' not in st.session_state:
+        st.session_state[f'current_params_{hero}'] = {param: random.randint(50, 150) for param in PARAMS}
+    
+    current_params = st.session_state[f'current_params_{hero}']
+    
     st.subheader("Текущие параметры")
-    current_params = {param: random.randint(50, 150) for param in PARAMS}
     
     col1, col2 = st.columns(2)
-    proposed_params = {}
     
     with col1:
         st.write("**Текущие значения:**")
@@ -69,16 +77,40 @@ with tab2:
     
     with col2:
         st.write("**Предлагаемые изменения:**")
+        
+        # Инициализация значений для ползунков
         for param in PARAMS:
-            proposed_params[param] = st.slider(
+            param_key = f"{hero}_{param}"
+            
+            # Если значение еще не сохранено, используем текущее
+            if param_key not in st.session_state.proposed_params:
+                st.session_state.proposed_params[param_key] = current_params[param]
+            
+            # Ползунок с сохранением состояния
+            new_value = st.slider(
                 param, 
                 min_value=int(current_params[param] * 0.5), 
                 max_value=int(current_params[param] * 1.5), 
-                value=current_params[param],
-                key=f"slider_{param}"
+                value=st.session_state.proposed_params[param_key],
+                key=param_key,
+                on_change=lambda p=param, h=hero: None
             )
+            
+            # Сохраняем новое значение в session_state
+            st.session_state.proposed_params[f"{hero}_{param}"] = new_value
+    
+    # Кнопка сброса значений
+    if st.button("Сбросить к текущим значениям", key="reset_button"):
+        for param in PARAMS:
+            st.session_state.proposed_params[f"{hero}_{param}"] = current_params[param]
+        st.rerun()
     
     if st.button("Рассчитать влияние", type="primary"):
+        # Собираем текущие значения ползунков
+        current_slider_values = {}
+        for param in PARAMS:
+            current_slider_values[param] = st.session_state.proposed_params[f"{hero}_{param}"]
+        
         # Демо-расчёт изменения винрейта
         delta = random.uniform(-10, 10)
         st.subheader("Результаты анализа")

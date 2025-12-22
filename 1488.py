@@ -11,6 +11,15 @@ st.set_page_config(page_title="Game Balance AI", layout="wide")
 HEROES = ["Axe", "Джаггернаут", "Invoker", "Cristal maiden", "Pudge"]
 PARAMS = ["Урон", "Здоровье", "Скорость атаки", "Броня", "Мана"]
 
+# Фиксированные винрейты для героев
+WINRATES = {
+    "Axe": 55.3,
+    "Джаггернаут": 50.1,
+    "Invoker": 48.2,
+    "Cristal maiden": 50.5,
+    "Pudge": 51.2
+}
+
 # =================== ЗАГОЛОВОК ===================
 st.title("🎮 Интеллектуальная система анализа баланса и генерации контента")
 st.markdown("---")
@@ -22,11 +31,10 @@ tab1, tab2, tab3, tab4 = st.tabs(["Дашборд", "Балансировка", 
 with tab1:
     st.header("Общая статистика баланса")
     
-    # Демо-данные для графиков
-    winrates = {hero: round(random.uniform(40, 60), 1) for hero in HEROES}
+    # Используем фиксированные винрейты и генерируем pickrates
     pickrates = {hero: random.randint(5, 30) for hero in HEROES}
     
-    df_winrate = pd.DataFrame(list(winrates.items()), columns=["Герой", "Винрейт (%)"])
+    df_winrate = pd.DataFrame(list(WINRATES.items()), columns=["Герой", "Винрейт (%)"])
     df_pickrate = pd.DataFrame(list(pickrates.items()), columns=["Герой", "Частота выбора (%)"])
     
     col1, col2 = st.columns(2)
@@ -117,9 +125,8 @@ with tab2:
         st.metric("Мана", f"{current_params['Мана']} MP", 
                  delta=None, help="Базовый запас маны")
         
-        # Показываем текущий винрейт героя (из вкладки 1)
-        winrates_tab1 = {hero: round(random.uniform(40, 60), 1) for hero in HEROES}
-        current_winrate = winrates_tab1[hero]
+        # Используем фиксированный винрейт из словаря WINRATES
+        current_winrate = WINRATES[hero]
         st.metric("Текущий винрейт", f"{current_winrate}%", 
                  delta=None, help="Актуальный винрейт на основе статистики")
     
@@ -210,7 +217,7 @@ with tab2:
         
         # Ограничиваем диапазон изменения винрейта
         delta = max(-15, min(15, total_impact))
-        new_winrate = max(30, min(70, current_winrate + delta))
+        new_winrate = max(30, min(70, WINRATES[hero] + delta))
         
         st.subheader("📊 Результаты анализа баланса")
         
@@ -218,7 +225,7 @@ with tab2:
         col_res1, col_res2, col_res3 = st.columns(3)
         
         with col_res1:
-            st.metric("Текущий винрейт", f"{current_winrate}%", 
+            st.metric("Текущий винрейт", f"{WINRATES[hero]}%", 
                      delta=f"{delta:.1f}%", delta_color="inverse" if delta > 5 or delta < -5 else "normal")
             st.metric("Прогнозируемый винрейт", f"{new_winrate:.1f}%")
         
@@ -404,7 +411,6 @@ with tab2:
                 st.write("**Сохраненные параметры:**")
                 st.json(proposed_params)
 
-
 # =================== ВКЛАДКА 3: ГЕНЕРАТОР КОНТЕНТА ===================
 with tab3:
     st.header("Генерация нового игрового контента")
@@ -487,6 +493,74 @@ with tab4:
             time.sleep(0.02)
             progress_bar.progress(i + 1)
         st.success("✅ Данные обработаны и готовы к анализу")
+
+# =================== ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ В САЙДБАР ===================
+with st.sidebar:
+    st.header("ℹ️ О параметрах героев")
+    
+    selected_hero = st.selectbox("Выберите героя для справки:", HEROES, key="sidebar_hero")
+    
+    if selected_hero in HERO_STATS:
+        st.subheader(f"Характеристики {selected_hero}")
+        
+        stats = HERO_STATS[selected_hero]
+        
+        # Определяем роль героя
+        if selected_hero in ["Axe", "Pudge"]:
+            role = "Танк/Иницииатор"
+            desc = "Высокое здоровье и броня, хороший контроль"
+        elif selected_hero == "Джаггернаут":
+            role = "Керри/Урон"
+            desc = "Высокий урон и скорость атаки, но хрупкий"
+        elif selected_hero in ["Invoker", "Cristal maiden"]:
+            role = "Маг/Саппорт"
+            desc = "Высокая мана и контроль, но низкая выживаемость"
+        else:
+            role = "Универсал"
+            desc = "Сбалансированные характеристики"
+        
+        st.write(f"**Роль:** {role}")
+        st.write(f"**Описание:** {desc}")
+        
+        # Показываем характеристики
+        for param, value in stats.items():
+            if param == "Здоровье":
+                st.progress(value/1200, text=f"{param}: {value} HP")
+            elif param == "Мана":
+                st.progress(value/500, text=f"{param}: {value} MP")
+            elif param == "Броня":
+                st.progress((value + 5)/25, text=f"{param}: {value}")
+            elif param == "Урон":
+                st.progress(value/200, text=f"{param}: {value}")
+            else:  # Скорость атаки
+                st.progress(value/300, text=f"{param}: {value}")
+    
+    st.markdown("---")
+    st.subheader("📊 Текущие винрейты героев")
+    
+    # Показываем винрейты в сайдбаре
+    for hero_name, winrate in WINRATES.items():
+        # Определяем цвет индикатора
+        if winrate > 54:
+            color = "🔴"  # Слишком высокий
+        elif winrate > 52:
+            color = "🟡"  # Выше среднего
+        elif winrate < 46:
+            color = "🔵"  # Слишком низкий
+        elif winrate < 48:
+            color = "🟠"  # Ниже среднего
+        else:
+            color = "🟢"  # Сбалансированный
+        
+        st.metric(f"{color} {hero_name}", f"{winrate}%")
+    
+    st.markdown("---")
+    st.caption("**Справка по параметрам:**")
+    st.caption("- **Здоровье (HP):** Запас жизней героя")
+    st.caption("- **Броня:** Снижает получаемый физический урон")
+    st.caption("- **Урон:** Базовый урон при атаке")
+    st.caption("- **Скорость атаки:** Скорость нанесения ударов")
+    st.caption("- **Мана (MP):** Запас маны для использования способностей")
 
 # =================== ФУТЕР ===================
 st.markdown("---")

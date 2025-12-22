@@ -8,7 +8,7 @@ import random
 st.set_page_config(page_title="Game Balance AI", layout="wide")
 
 # Демо-данные
-HEROES = ["Axe", "Джаггернаут", "Invoker", "Cristal maiden", "Pudge"]
+HEROES = ["Axe", "Juggernaut", "Invoker", "Cristal maiden", "Pudge"]
 PARAMS = ["Урон", "Здоровье", "Скорость атаки", "Броня", "Мана"]
 
 # Фиксированные винрейты для героев
@@ -30,7 +30,7 @@ POPULARITY = {
 }
 
 # =================== ЗАГОЛОВОК ===================
-st.title("🎮 Интеллектуальная система анализа баланса и генерации контента")
+st.title("Интеллектуальная система анализа баланса и генерации контента")
 st.markdown("---")
 
 # =================== ВКЛАДКИ ===================
@@ -555,74 +555,6 @@ with tab4:
             time.sleep(0.02)
             progress_bar.progress(i + 1)
         st.success("✅ Данные обработаны и готовы к анализу")
-
-# =================== ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ В САЙДБАР ===================
-with st.sidebar:
-    st.header("ℹ️ Статистика героев")
-    
-    selected_hero = st.selectbox("Выберите героя:", HEROES, key="sidebar_hero")
-    
-    if selected_hero in HERO_STATS:
-        st.subheader(f"📊 {selected_hero}")
-        
-        # Винрейт с индикатором
-        winrate = WINRATES[selected_hero]
-        if winrate > 54:
-            winrate_status = "🔴 Слишком высокий"
-        elif winrate > 52:
-            winrate_status = "🟡 Выше среднего"
-        elif winrate < 46:
-            winrate_status = "🔵 Слишком низкий"
-        elif winrate < 48:
-            winrate_status = "🟠 Ниже среднего"
-        else:
-            winrate_status = "🟢 Сбалансированный"
-        
-        st.metric("Винрейт", f"{winrate}%", winrate_status)
-        
-        # Популярность с индикатором
-        popularity = POPULARITY[selected_hero]
-        if popularity > 25:
-            popularity_status = "🔥 Очень популярный"
-        elif popularity > 20:
-            popularity_status = "⭐ Популярный"
-        elif popularity < 12:
-            popularity_status = "📉 Непопулярный"
-        else:
-            popularity_status = "📊 Средняя популярность"
-        
-        st.metric("Популярность", f"{popularity}%", popularity_status)
-        
-        # Рейтинг героя
-        st.markdown("---")
-        st.subheader("🏆 Рейтинг героя")
-        
-        # Место по винрейту
-        winrate_rank = sorted(WINRATES.items(), key=lambda x: x[1], reverse=True)
-        winrate_position = [i for i, (h, _) in enumerate(winrate_rank) if h == selected_hero][0] + 1
-        st.write(f"**Место по винрейту:** #{winrate_position} из {len(HEROES)}")
-        
-        # Место по популярности
-        popularity_rank = sorted(POPULARITY.items(), key=lambda x: x[1], reverse=True)
-        popularity_position = [i for i, (h, _) in enumerate(popularity_rank) if h == selected_hero][0] + 1
-        st.write(f"**Место по популярности:** #{popularity_position} из {len(HEROES)}")
-        
-        # Общая оценка баланса
-        balance_score = (winrate / 60 * 0.6 + popularity / 30 * 0.4) * 100
-        st.progress(balance_score/100, text=f"Общая оценка: {balance_score:.1f}/100")
-    
-    st.markdown("---")
-    st.subheader("📈 Топ-5 по популярности")
-    
-    # Сортировка по популярности
-    sorted_popularity = sorted(POPULARITY.items(), key=lambda x: x[1], reverse=True)
-    
-    for i, (hero_name, pop_value) in enumerate(sorted_popularity, 1):
-        medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else f"{i}."
-        st.write(f"{medal} **{hero_name}**: {pop_value}%")
-    
-    st.markdown("---")
-    st.caption("**Примечание:** Балансным считается винрейт 48-52%. Популярность выше 20% считается высокой.")
 
 # =================== ФУТЕР ===================
 st.markdown("---")

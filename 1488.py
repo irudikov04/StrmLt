@@ -71,7 +71,7 @@ with tab1:
                          "Axe": "#4ECDC4",        # Бирюзовый
                          "Invoker": "#45B7D1",    # Голубой
                          "Cristal maiden": "#96CEB4", # Зеленый
-                         "Джаггернаут": "#FFEAA7" # Желтый для самого непопулярного
+                         "Juggernaut": "#FFEAA7" # Желтый для самого непопулярного
                      })
         fig2.update_traces(textposition='inside', textinfo='percent+label')
         st.plotly_chart(fig2, use_container_width=True)
